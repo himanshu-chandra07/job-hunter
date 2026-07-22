@@ -1,0 +1,21 @@
+{
+  "name": "job-hunter",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Local job-hunting dashboard: company ATS jobs + LinkedIn postings",
+  "workspaces": [
+    "server",
+    "client"
+  ],
+  "scripts": {
+    "dev": "concurrently -n server,client -c blue,green \"npm:dev:server\" \"npm:dev:client\"",
+    "dev:server": "npm --workspace server run dev",
+    "dev:client": "npm --workspace client run dev",
+    "build": "npm --workspace client run build",
+    "start": "node server/src/index.js",
+    "start:dev": "npm run dev"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  }
+}

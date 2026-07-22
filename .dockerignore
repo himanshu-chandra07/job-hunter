@@ -1,0 +1,13 @@
+node_modules
+**/node_modules
+client/dist
+.git
+.gitignore
+*.log
+.vite
+**/.vite
+.browser-profile
+server/.browser-profile
+server/data
+docs
+*.md

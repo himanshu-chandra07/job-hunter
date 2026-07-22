@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Job Hunter — Admin</title>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin=""
+    />
+    <style>
+      :root {
+        --bg: #0b0e14; --panel: #151a23; --panel2: #1b212c; --border: #262d3a;
+        --text: #e6e9ef; --muted: #8a93a6; --accent: #4f8cff; --accent2: #6ee7b7;
+        --danger: #ff6b6b; --radius: 12px;
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+        background: radial-gradient(1200px 600px at 70% -10%, #16203a 0%, var(--bg) 55%);
+        color: var(--text); min-height: 100vh; }
+      a { color: var(--accent); }
+      .wrap { max-width: 1100px; margin: 0 auto; padding: 24px 18px 60px; }
+      .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+      .brand h1 { font-size: 20px; margin: 0; }
+      .brand .logo { font-size: 26px;
+        background: linear-gradient(135deg, var(--accent), var(--accent2));
+        -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+      .sub { color: var(--muted); font-size: 13px; }
+      .card { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; }
+      .center { min-height: 70vh; display: flex; align-items: center; justify-content: center; }
+      .login { width: 100%; max-width: 380px; }
+      label.fld { display: block; font-size: 13px; color: var(--muted); margin: 12px 0 5px; }
+      input { width: 100%; background: var(--panel2); border: 1px solid var(--border); color: var(--text);
+        padding: 11px 13px; border-radius: 9px; font-size: 14px; outline: none; }
+      input:focus { border-color: var(--accent); }
+      button.primary { margin-top: 16px; width: 100%; background: linear-gradient(135deg, var(--accent), #3b6fd4);
+        color: #fff; border: none; padding: 12px; border-radius: 9px; font-weight: 600; font-size: 14px; cursor: pointer; }
+      button.ghost { background: var(--panel2); color: var(--text); border: 1px solid var(--border);
+        padding: 8px 14px; border-radius: 9px; font-weight: 600; font-size: 13px; cursor: pointer; }
+      .row { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+      .link { background: none; border: none; color: var(--accent); cursor: pointer; font-size: 13px; padding: 0; margin-top: 12px; }
+      .msg { margin-top: 12px; font-size: 13px; }
+      .msg.err { color: #ffc9c9; }
+      .msg.ok { color: var(--accent2); }
+      .hidden { display: none !important; }
+      .stats { display: flex; gap: 12px; flex-wrap: wrap; margin: 16px 0; }
+      .stat { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 16px; min-width: 130px; }
+      .stat .n { font-size: 24px; font-weight: 700; }
+      .stat .l { color: var(--muted); font-size: 12px; }
+      #map { height: 460px; border-radius: var(--radius); border: 1px solid var(--border); }
+      table { width: 100%; border-collapse: collapse; font-size: 13px; }
+      th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); }
+      thead th { color: var(--muted); font-weight: 600; position: sticky; top: 0; background: var(--panel); }
+      .tabs { display: flex; gap: 8px; margin: 18px 0 12px; }
+      .tab { background: var(--panel2); border: 1px solid var(--border); color: var(--muted);
+        padding: 8px 16px; border-radius: 9px; cursor: pointer; font-weight: 600; font-size: 13px; }
+      .tab.active { color: #fff; border-color: var(--accent); background: linear-gradient(135deg, var(--accent), #3b6fd4); }
+      .scroll { max-height: 360px; overflow: auto; border: 1px solid var(--border); border-radius: var(--radius); }
+      .leaflet-popup-content { color: #111; }
+      .pill { background: var(--panel2); border: 1px solid var(--border); border-radius: 999px; padding: 2px 9px; font-size: 11px; color: var(--muted); }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="brand">
+        <span class="logo">⛯</span>
+        <div><h1>Job Hunter — Admin</h1><div class="sub">private dashboard · traffic & feedback</div></div>
+      </div>
+
+      <!-- LOGIN -->
+      <div id="view-login" class="center hidden">
+        <div class="login card">
+          <h2 style="margin:0 0 4px;font-size:18px">Sign in</h2>
+          <div class="sub">Authorized access only.</div>
+          <form id="loginForm">
+            <label class="fld">Username</label>
+            <input id="u" autocomplete="username" autofocus />
+            <label class="fld">Password</label>
+            <input id="p" type="password" autocomplete="current-password" />
+            <button class="primary" type="submit">Sign in</button>
+          </form>
+          <button class="link" id="toForgot">Forgot password?</button>
+          <div id="loginMsg" class="msg"></div>
+        </div>
+      </div>
+
+      <!-- FORGOT -->
+      <div id="view-forgot" class="center hidden">
+        <div class="login card">
+          <h2 style="margin:0 0 4px;font-size:18px">Reset password</h2>
+          <div class="sub">A reset link will be emailed to the registered owner address.</div>
+          <form id="forgotForm">
+            <label class="fld">Username</label>
+            <input id="fu" autocomplete="username" />
+            <button class="primary" type="submit">Send reset link</button>
+          </form>
+          <button class="link" id="toLogin">Back to sign in</button>
+          <div id="forgotMsg" class="msg"></div>
+        </div>
+      </div>
+
+      <!-- RESET -->
+      <div id="view-reset" class="center hidden">
+        <div class="login card">
+          <h2 style="margin:0 0 4px;font-size:18px">Set a new password</h2>
+          <div class="sub">Enter a new password (min 8 characters).</div>
+          <form id="resetForm">
+            <label class="fld">New password</label>
+            <input id="np" type="password" autocomplete="new-password" />
+            <label class="fld">Confirm password</label>
+            <input id="np2" type="password" autocomplete="new-password" />
+            <button class="primary" type="submit">Update password</button>
+          </form>
+          <div id="resetMsg" class="msg"></div>
+        </div>
+      </div>
+
+      <!-- PORTAL -->
+      <div id="view-portal" class="hidden">
+        <div class="row">
+          <div class="sub">Signed in as <strong id="who"></strong></div>
+          <div style="display:flex;gap:8px">
+            <button class="ghost" id="refresh">Refresh</button>
+            <button class="ghost" id="logout">Sign out</button>
+          </div>
+        </div>
+
+        <div class="tabs">
+          <div class="tab active" data-tab="traffic">Traffic map</div>
+          <div class="tab" data-tab="feedback">Feedback</div>
+        </div>
+
+        <div id="tab-traffic">
+          <div class="stats">
+            <div class="stat"><div class="n" id="s-total">0</div><div class="l">Total visits</div></div>
+            <div class="stat"><div class="n" id="s-india">0</div><div class="l">India visits</div></div>
+            <div class="stat"><div class="n" id="s-cities">0</div><div class="l">Cities</div></div>
+          </div>
+          <div id="map"></div>
+          <h3 style="margin:18px 0 8px;font-size:15px">By city</h3>
+          <div class="scroll">
+            <table>
+              <thead><tr><th>City</th><th>Region</th><th>Country</th><th>Visits</th><th>Share</th></tr></thead>
+              <tbody id="cityRows"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="tab-feedback" class="hidden">
+          <div class="stats"><div class="stat"><div class="n" id="f-count">0</div><div class="l">Submissions</div></div></div>
+          <div class="scroll">
+            <table>
+              <thead><tr><th>When</th><th>Type</th><th>Message</th><th>Name</th><th>Contact</th></tr></thead>
+              <tbody id="fbRows"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script
+      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+      crossorigin=""
+    ></script>
+    <script>
+      const $ = (id) => document.getElementById(id);
+      const views = ["login", "forgot", "reset", "portal"];
+      function show(v) { views.forEach((x) => $("view-" + x).classList.toggle("hidden", x !== v)); }
+      const qs = new URLSearchParams(location.search);
+      const resetToken = qs.get("reset");
+
+      async function api(path, opts) {
+        const r = await fetch(path, Object.assign({ headers: { "Content-Type": "application/json" } }, opts));
+        const data = await r.json().catch(() => ({}));
+        if (!r.ok) throw new Error(data.error || ("Request failed (" + r.status + ")"));
+        return data;
+      }
+
+      // ---- auth views ----
+      $("toForgot").onclick = () => { show("forgot"); };
+      $("toLogin").onclick = () => { show("login"); };
+
+      $("loginForm").onsubmit = async (e) => {
+        e.preventDefault();
+        $("loginMsg").textContent = "";
+        try {
+          await api("/api/admin/login", { method: "POST", body: JSON.stringify({ username: $("u").value, password: $("p").value }) });
+          enterPortal();
+        } catch (err) { $("loginMsg").className = "msg err"; $("loginMsg").textContent = err.message; }
+      };
+
+      $("forgotForm").onsubmit = async (e) => {
+        e.preventDefault();
+        $("forgotMsg").textContent = "";
+        try {
+          const d = await api("/api/admin/forgot", { method: "POST", body: JSON.stringify({ username: $("fu").value }) });
+          $("forgotMsg").className = "msg ok";
+          $("forgotMsg").textContent = d.message || "If that account exists, a reset link has been emailed.";
+        } catch (err) { $("forgotMsg").className = "msg err"; $("forgotMsg").textContent = err.message; }
+      };
+
+      $("resetForm").onsubmit = async (e) => {
+        e.preventDefault();
+        $("resetMsg").textContent = "";
+        if ($("np").value !== $("np2").value) { $("resetMsg").className = "msg err"; $("resetMsg").textContent = "Passwords do not match."; return; }
+        try {
+          await api("/api/admin/reset", { method: "POST", body: JSON.stringify({ token: resetToken, password: $("np").value }) });
+          $("resetMsg").className = "msg ok";
+          $("resetMsg").textContent = "Password updated. Redirecting to sign in…";
+          setTimeout(() => { location.href = "/adminpage"; }, 1500);
+        } catch (err) { $("resetMsg").className = "msg err"; $("resetMsg").textContent = err.message; }
+      };
+
+      $("logout").onclick = async () => { try { await api("/api/admin/logout", { method: "POST" }); } catch {} location.href = "/adminpage"; };
+      $("refresh").onclick = () => loadPortal();
+
+      document.querySelectorAll(".tab").forEach((t) => {
+        t.onclick = () => {
+          document.querySelectorAll(".tab").forEach((x) => x.classList.remove("active"));
+          t.classList.add("active");
+          const tab = t.dataset.tab;
+          $("tab-traffic").classList.toggle("hidden", tab !== "traffic");
+          $("tab-feedback").classList.toggle("hidden", tab !== "feedback");
+          if (tab === "traffic" && map) setTimeout(() => map.invalidateSize(), 50);
+        };
+      });
+
+      // ---- portal ----
+      let map, markersLayer;
+      function initMap() {
+        if (map) return;
+        map = L.map("map", { worldCopyJump: true }).setView([22.0, 80.0], 4);
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          maxZoom: 18, attribution: "© OpenStreetMap",
+        }).addTo(map);
+        markersLayer = L.layerGroup().addTo(map);
+      }
+
+      function renderMap(cities) {
+        initMap();
+        markersLayer.clearLayers();
+        const pts = cities.filter((c) => typeof c.lat === "number" && typeof c.lon === "number");
+        const max = pts.reduce((m, c) => Math.max(m, c.count), 1);
+        const bounds = [];
+        for (const c of pts) {
+          const r = 6 + 16 * Math.sqrt(c.count / max);
+          const inIndia = c.countryCode === "IN" || /india/i.test(c.country || "");
+          L.circleMarker([c.lat, c.lon], {
+            radius: r, color: inIndia ? "#6ee7b7" : "#4f8cff",
+            fillColor: inIndia ? "#6ee7b7" : "#4f8cff", fillOpacity: 0.45, weight: 1.5,
+          }).bindPopup("<b>" + (c.city || "Unknown") + "</b><br>" + [c.region, c.country].filter(Boolean).join(", ") + "<br>Visits: <b>" + c.count + "</b>").addTo(markersLayer);
+          bounds.push([c.lat, c.lon]);
+        }
+        if (bounds.length) map.fitBounds(bounds, { padding: [40, 40], maxZoom: 6 });
+      }
+
+      async function loadPortal() {
+        const t = await api("/api/admin/traffic");
+        $("s-total").textContent = t.total || 0;
+        $("s-india").textContent = t.indiaTotal || 0;
+        $("s-cities").textContent = t.cityCount || 0;
+        const rows = (t.cities || []).map((c) => {
+          const share = t.total ? Math.round((c.count / t.total) * 100) : 0;
+          return "<tr><td>" + esc(c.city || "Unknown") + "</td><td>" + esc(c.region || "") + "</td><td>" + esc(c.country || "") + "</td><td>" + c.count + "</td><td>" + share + "%</td></tr>";
+        }).join("");
+        $("cityRows").innerHTML = rows || '<tr><td colspan="5" style="color:var(--muted)">No traffic recorded yet.</td></tr>';
+        renderMap(t.cities || []);
+
+        try {
+          const f = await api("/api/admin/feedback");
+          $("f-count").textContent = f.count || 0;
+          $("fbRows").innerHTML = (f.entries || []).map((e) =>
+            "<tr><td>" + esc((e.createdAt || "").replace("T", " ").slice(0, 16)) + "</td><td>" + esc(e.category || "") + "</td><td>" + esc(e.message || "") + "</td><td>" + esc(e.name || "") + "</td><td>" + esc(e.contact || "") + "</td></tr>"
+          ).join("") || '<tr><td colspan="5" style="color:var(--muted)">No feedback yet.</td></tr>';
+        } catch {}
+      }
+
+      function esc(s) { return String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
+
+      async function enterPortal() {
+        const me = await api("/api/admin/me").catch(() => ({ authed: false }));
+        if (!me.authed) { show("login"); return; }
+        $("who").textContent = me.username;
+        show("portal");
+        setTimeout(() => map && map.invalidateSize(), 100);
+        loadPortal();
+      }
+
+      // boot
+      (async () => {
+        if (resetToken) { show("reset"); return; }
+        const me = await api("/api/admin/me").catch(() => ({ authed: false }));
+        if (me.authed) { $("who").textContent = me.username; show("portal"); loadPortal(); }
+        else show("login");
+      })();
+    </script>
+  </body>
+</html>

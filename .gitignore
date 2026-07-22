@@ -1,0 +1,24 @@
+# dependencies & build output
+node_modules/
+dist/
+.vite/
+
+# secrets & runtime data (admin.json hash, feedback, traffic, env)
+.env
+.env.*
+!.env.example
+server/data/
+server/.browser-profile/
+.browser-profile/
+
+# logs & process files
+*.log
+*.pid
+
+# OS / editor temp
+.DS_Store
+~$*
+*.tmp
+
+# accidentally-extracted docx artifacts
+_unpacked/
