@@ -157,7 +157,7 @@ const WORKDAY_DIRECTORY = {
   nvidia: { tenant: "nvidia", dc: "wd5", site: "NVIDIAExternalCareerSite" },
   adobe: { tenant: "adobe", dc: "wd5", site: "external_experienced" },
   workday: { tenant: "workday", dc: "wd5", site: "Workday" },
-  autodesk: { tenant: "autodesk", dc: "wd1", site: "Ext" },
+  autodesk: { tenant: "autodesk", dc: "wd1", site: "Ext", search: "India" },
   hp: { tenant: "hp", dc: "wd5", site: "ExternalCareerSite" },
   paypal: { tenant: "paypal", dc: "wd1", site: "jobs" },
   mastercard: { tenant: "mastercard", dc: "wd1", site: "CorporateCareers" },
@@ -168,6 +168,10 @@ const WORKDAY_DIRECTORY = {
   vmware: { tenant: "broadcom", dc: "wd1", site: "External_Career" },
   omnissa: { tenant: "omnissa", dc: "wd501", site: "Omnissa_External_Career_Site" },
   ebay: { tenant: "ebay", dc: "wd5", site: "apply" },
+  // Expedia Group runs Workday on an unusual data center (wd108), site "search".
+  // India-biased so the India subset is fully covered rather than lost in the
+  // global list.
+  expedia: { tenant: "expedia", dc: "wd108", site: "search", search: "India" },
 };
 
 async function workday({ tenant, dc, site, search }, label, query = "") {

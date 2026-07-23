@@ -91,6 +91,8 @@ const ENTRIES = [
   // Target in India (TII): India-only careers board on TalentBrew/Radancy.
   ["Target", "https://indiajobs.target.com"],
   ["Visa", "https://corporate.visa.com/en/jobs/"],
+  ["Autodesk", "https://www.autodesk.com/careers/overview"],
+  ["Expedia", "https://careers.expediagroup.com/jobs/"],
   // Quant / financial-tech firms on custom portals (parsed via dedicated fetchers).
   ["DE Shaw", "https://www.deshawindia.com/careers/work-with-us"],
   ["Arcesium", "https://www.arcesium.com/careers"],
@@ -239,6 +241,8 @@ const STATUS = {
   tesco: ["Tesco", 60],
   target: ["Target", 86],
   visa: ["Workday", 113],
+  autodesk: ["Workday", 70],
+  expedia: ["Workday", 13],
   deshaw: ["DE Shaw", 91],
   arcesium: ["Greenhouse", 33],
   goldmansachs: ["LinkedIn", 30],
